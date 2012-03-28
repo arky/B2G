@@ -285,12 +285,12 @@ config-galaxy-s2: adb-check-version $(APNS_CONF)
 	echo OK
 
 .PHONY: config-galaxy-s2-i9100g
-config-galaxy-s2-i9100g: config-gecko adb-check-version $(APNS_CONF)
+config-galaxy-s2-i9100g: adb-check-version $(APNS_CONF)
 	@echo "KERNEL = galaxy-s2-i9100g" > .config.mk && \
         echo "KERNEL_PATH = ./boot/kernel-android-galaxy-s2-i9100g" >> .config.mk && \
 	echo "GONK = galaxys2G" >> .config.mk && \
 	export PATH=$$PATH:$$(dirname $(ADB)) && \
-	cp -p config/kernel-galaxy-s2-i9100g boot/kernel-android-galaxy-s2-i9100g/.config && \
+	cp -p config/kernel-galaxy-s2-i9100g_defconfig boot/kernel-android-galaxy-s2-i9100g/.config && \
 	cd $(GONK_PATH)/device/samsung/galaxys2G/ && \
 	echo Extracting binary blobs from device, which should be plugged in! ... && \
 	./extract-files.sh && \
