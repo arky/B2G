@@ -352,3 +352,6 @@
 [submodule "toolchains"]
 	path = toolchains
 	url = git://github.com/mozilla-b2g/b2g-toolchains.git
+[submodule "boot/kernel-android-galaxy-s2-i9100g"]
+	path = boot/kernel-android-galaxy-s2-i9100g
+	url = git@github.com:changyihsin/android_kernel_samsung_i9100g.git
