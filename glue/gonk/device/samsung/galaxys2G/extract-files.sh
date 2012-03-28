@@ -59,7 +59,7 @@ PROPRIETARY_COMMON_DIR=../../../$BASE_PROPRIETARY_COMMON_DIR
 
 mkdir -p $PROPRIETARY_DEVICE_DIR
 
-for NAME in audio cameradata egl hw keychars wifi media ducati csc alsa bin
+for NAME in audio cameradata egl hw keychars wifi media ducati csc alsa bin vendor
 do
     mkdir -p $PROPRIETARY_COMMON_DIR/$NAME
 done
@@ -145,6 +145,21 @@ copy_files()
             echo Failed to pull $NAME. Giving up.
             exit -1
         fi
+    done
+}
+
+# copy_local_files
+# puts files in this directory on the list of blobs to install
+#
+# $1 = list of files
+# $2 = directory path on device
+# $3 = local directory path
+copy_local_files()
+{
+    for NAME in $1
+    do
+        echo Adding \"$NAME\"
+        echo device/$MANUFACTURER/$DEVICE/$3/$NAME:$2/$NAME \\ >> $COMMON_BLOBS_LIST
     done
 }
 
@@ -364,10 +379,9 @@ BINARY="
 	bluetoothd
 	btld
 	pvrsrvinit
-	buxybox
 	"
 
-copy_files "$RILD" "system/bin" "bin"
+copy_files "$BINARY" "system/bin" "bin"
 
 COMMON_CAMERADATA="
 	RS_M5LS_C.bin
@@ -385,6 +399,42 @@ COMMON_EGL="
 
 copy_files "$COMMON_EGL" "system/lib/egl" "egl"
 
+VENDORLIBS="
+	libglslcompiler.so
+	libglslcompiler.so.1.1.17.4403
+	libIMGegl.so
+	libIMGegl.so.1.1.17.4403
+	libpvr2d.so
+	libpvr2d.so.1.1.17.4403
+	libpvrANDROID_WSEGL.so
+	libpvrANDROID_WSEGL.so.1.1.17.4403
+	libPVRScopeServices.so
+	libPVRScopeServices.so.1.1.17.4403
+	libsrv_init.so
+	libsrv_init.so.1.1.17.4403
+	libsrv_um.so
+	libsrv_um.so.1.1.17.4403
+	libusc.so
+	libusc.so.1.1.17.4403
+	"
+copy_files "$VENDORLIBS" "system/vendor/lib" "vendor"
+
+VENDORLIBS_EGL="
+	libEGL_POWERVR_SGX540_120.so
+	libEGL_POWERVR_SGX540_120.so.1.1.17.4403
+	libGLESv1_CM_POWERVR_SGX540_120.so
+	libGLESv1_CM_POWERVR_SGX540_120.so.1.1.17.4403
+	libGLESv2_POWERVR_SGX540_120.so
+	libGLESv2_POWERVR_SGX540_120.so.1.1.17.4403
+	"
+copy_files "$VENDORLIBS_EGL" "system/vendor/lib/egl" "vendor"
+
+VENDORLIBS_HW="
+	gralloc.omap4.so
+	gralloc.omap4.so.1.1.17.4403
+	"
+copy_files "$VENDORLIBS_HW" "system/vendor/lib/hw" "vendor"
+
 COMMON_HW="
 	acoustics.default.so
 	alsa.default.so
@@ -396,6 +446,15 @@ COMMON_HW="
 	sensors.omap4.so
 	"
 copy_files "$COMMON_HW" "system/lib/hw" "hw"
+
+COMMON_IDC="
+	melfas_ts.idc
+	qwerty2.idc
+	sec_touchscreen.idc
+	mxt224_ts_input.idc
+	qwerty.idc
+	"
+copy_local_files "$COMMON_IDC" "system/usr/idc" "idc"
 
 COMMON_KEYCHARS="
 	qwerty2.kcm.bin
