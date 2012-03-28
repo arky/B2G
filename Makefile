@@ -222,6 +222,17 @@ kernel:
 		find "$(KERNEL_DIR)" -name "*.ko" | \
 		    xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
 	    ) \
+	    $(if $(filter galaxy-s2-i9100g,$(KERNEL)), \
+		(rm -rf boot/initramfs && \
+		    cd boot/superatmos_galaxys2G-initramfs && \
+		    $(GIT) checkout-index -a -f --prefix ../initramfs/); \
+		PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
+		    $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
+		    CROSS_COMPILE="$(CCACHE) arm-eabi-"; \
+		find "$(KERNEL_DIR)" -name "*.ko" | \
+		    xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
+	    ) \
+
 	    PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
 		$(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
 		CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
@@ -269,6 +280,18 @@ config-galaxy-s2: adb-check-version $(APNS_CONF)
 	export PATH=$$PATH:$$(dirname $(ADB)) && \
 	cp -p config/kernel-galaxy-s2 boot/kernel-android-galaxy-s2/.config && \
 	cd glue/gonk/device/samsung/galaxys2/ && \
+	echo Extracting binary blobs from device, which should be plugged in! ... && \
+	./extract-files.sh && \
+	echo OK
+
+.PHONY: config-galaxy-s2-i9100g
+config-galaxy-s2-i9100g: config-gecko adb-check-version $(APNS_CONF)
+	@echo "KERNEL = galaxy-s2-i9100g" > .config.mk && \
+        echo "KERNEL_PATH = ./boot/kernel-android-galaxy-s2-i9100g" >> .config.mk && \
+	echo "GONK = galaxys2G" >> .config.mk && \
+	export PATH=$$PATH:$$(dirname $(ADB)) && \
+	cp -p config/kernel-galaxy-s2-i9100g boot/kernel-android-galaxy-s2-i9100g/.config && \
+	cd $(GONK_PATH)/device/samsung/galaxys2G/ && \
 	echo Extracting binary blobs from device, which should be plugged in! ... && \
 	./extract-files.sh && \
 	echo OK
