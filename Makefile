@@ -212,30 +212,33 @@ gonk: gaia
 # XXX Hard-coded for gonk tool support
 kernel:
 	@$(call DEP_CHECK,$(KERNEL_PATH)/.b2g-build-done,$(KERNEL_PATH),\
-	    $(if $(filter galaxy-s2,$(KERNEL)), \
-		(rm -rf boot/initramfs && \
-		    cd boot/clockworkmod_galaxys2_initramfs && \
-		    $(GIT) checkout-index -a -f --prefix ../initramfs/); \
-		PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
-		    $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
-		    CROSS_COMPILE="$(CCACHE) arm-eabi-"; \
-		find "$(KERNEL_DIR)" -name "*.ko" | \
-		    xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
-	    ) \
-	    $(if $(filter galaxy-s2-i9100g,$(KERNEL)), \
-		(rm -rf boot/initramfs && \
-		    cd boot/superatmos_galaxys2G-initramfs && \
-		    $(GIT) checkout-index -a -f --prefix ../initramfs/); \
-		PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
-		    $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
-		    CROSS_COMPILE="$(CCACHE) arm-eabi-"; \
-		find "$(KERNEL_DIR)" -name "*.ko" | \
-		    xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
-	    ) \
+            $(if $(filter galaxy-s2,$(KERNEL)), \
+                PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
+                    $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
+                    CROSS_COMPILE="$(CCACHE) arm-eabi-" modules; \
+                (rm -rf boot/initramfs && \
+                    cd boot/clockworkmod_galaxys2_initramfs && \
+                    git checkout-index -a -f --prefix ../initramfs/); \
+                find "$(KERNEL_DIR)" -name "*.ko" | \
+                    xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
+            ) \
+            PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
+                $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
+                CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
+	@$(call DEP_CHECK,$(KERNEL_PATH)/.b2g-build-done,$(KERNEL_PATH),\
+            $(if $(filter galaxy-s2-i9100g,$(KERNEL)), \
+                PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
+                    $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
+                    CROSS_COMPILE="$(CCACHE) arm-eabi-" modules; \
+                (rm -rf boot/initramfs && mkdir -p boot/initramfs &&\
+                    cp -rf boot/superatmos_galaxys2G-initramfs/* boot/initramfs);\
+                find "$(KERNEL_DIR)" -name "*.ko" | \
+                    xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
+            ) \
+            PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
+                $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
+                CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
 
-	    PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
-		$(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
-		CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
 
 .PHONY: clean
 clean: clean-gecko clean-gonk clean-kernel
