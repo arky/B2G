@@ -223,15 +223,14 @@ kernel:
                     xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
             ) \
 	    $(if $(filter galaxy-s2-i9100g,$(KERNEL)), \
-                (mkdir -p boot/initramfs && \
-                    cp -rf boot/superatmos_galaxys2G-initramfs/* boot/initramfs) &&\
-                PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
+                rm -rf boot/initramfs; mkdir -p boot/initramfs; cp -rf boot/superatmos_galaxys2G-initramfs/* boot/initramfs;\
+                PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
                     $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
-                    CROSS_COMPILE="$(CCACHE) arm-eabi-" ; \
+                    CROSS_COMPILE="$(CCACHE) arm-eabi-" modules; \
                 find "$(KERNEL_DIR)" -name "*.ko" | \
                     xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
             ) \
-            PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
+            PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" \
                 $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
                 CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
 
@@ -248,7 +247,8 @@ clean-gonk:
 
 .PHONY: clean-kernel
 clean-kernel:
-	@PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" $(MAKE) -C $(KERNEL_PATH) ARCH=arm CROSS_COMPILE=arm-eabi- clean
+	@PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" $(MAKE) -C $(KERNEL_PATH) ARCH=arm CROSS_COMPILE=arm-eabi- distclean
+	@PATH="$$PATH:$(abspath $(KERNEL_TOOLCHAIN_PATH))" $(MAKE) -C $(KERNEL_PATH) ARCH=arm CROSS_COMPILE=arm-eabi- mrproper
 	@rm -f $(KERNEL_PATH)/.b2g-build-done
 
 .PHONY: mrproper
@@ -443,6 +443,13 @@ $(HEIMDALL) flash --factoryfs $(GONK_PATH)/out/target/product/galaxys2/system.im
 $(FLASH_GALAXYS2_CMD_CHMOD_HACK)
 endef
 
+define FLASH_GALAXYS2G_CMD
+$(ADB) reboot download 
+sleep 20
+$(HEIMDALL) flash --factoryfs $(GONK_PATH)/out/target/product/galaxys2G/system.img
+endef
+
+
 .PHONY: flash-galaxys2
 flash-galaxys2: image adb-check-version
 	$(FLASH_GALAXYS2_CMD)
@@ -450,6 +457,15 @@ flash-galaxys2: image adb-check-version
 .PHONY: flash-only-galaxys2
 flash-only-galaxys2: adb-check-version
 	$(FLASH_GALAXYS2_CMD)
+
+.PHONY: flash-galaxys2G
+flash-galaxys2G: image adb-check-version
+	$(FLASH_GALAXYS2G_CMD)
+
+.PHONY: flash-only-galaxys2G
+flash-only-galaxys2G: adb-check-version
+	$(FLASH_GALAXYS2G_CMD)
+
 
 .PHONY: flash-maguro
 flash-maguro: image flash-only-maguro
