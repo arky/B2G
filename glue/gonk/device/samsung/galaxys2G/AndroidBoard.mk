@@ -41,12 +41,12 @@ endif
 # path gymnastics are needed:
 KERNELTREE_DIR=../../boot/kernel-android-galaxy-s2-i9100g
 KERNELTREE_DIR_REV=../../glue/gonk
-include $(LOCAL_PATH)/AndroidKernel.mk
+#include $(LOCAL_PATH)/AndroidKernel.mk
 
-file := $(LOCAL_PATH)/kernel
-ALL_PREBUILT += $(file)
-$(file) : $(TARGET_PREBUILT_KERNEL) | $(ACP)
-	$(transform-prebuilt-to-target)
+#file := $(LOCAL_PATH)/kernel
+#ALL_PREBUILT += $(file)
+#$(file) : $(TARGET_PREBUILT_KERNEL) | $(ACP)
+#	$(transform-prebuilt-to-target)
 
 # include the non-open-source counterpart to this file
 -include vendor/samsung/galaxys2i9100g/AndroidBoardVendor.mk
