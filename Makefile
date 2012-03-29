@@ -211,7 +211,7 @@ gonk: gaia
 # XXX Hard-coded for nexuss4g target
 # XXX Hard-coded for gonk tool support
 kernel:
-	@$(call DEP_CHECK,$(KERNEL_PATH)/.b2g-build-done,$(KERNEL_PATH),\
+	$(call DEP_CHECK,$(KERNEL_PATH)/.b2g-build-done,$(KERNEL_PATH),\
             $(if $(filter galaxy-s2,$(KERNEL)), \
                 PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
                     $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
@@ -222,23 +222,18 @@ kernel:
                 find "$(KERNEL_DIR)" -name "*.ko" | \
                     xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
             ) \
-            PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
-                $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
-                CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
-	@$(call DEP_CHECK,$(KERNEL_PATH)/.b2g-build-done,$(KERNEL_PATH),\
-            $(if $(filter galaxy-s2-i9100g,$(KERNEL)), \
+	    $(if $(filter galaxy-s2-i9100g,$(KERNEL)), \
+                (mkdir -p boot/initramfs && \
+                    cp -rf boot/superatmos_galaxys2G-initramfs/* boot/initramfs) &&\
                 PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
                     $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
-                    CROSS_COMPILE="$(CCACHE) arm-eabi-" modules; \
-                (rm -rf boot/initramfs && mkdir -p boot/initramfs &&\
-                    cp -rf boot/superatmos_galaxys2G-initramfs/* boot/initramfs);\
+                    CROSS_COMPILE="$(CCACHE) arm-eabi-" ; \
                 find "$(KERNEL_DIR)" -name "*.ko" | \
                     xargs -I MOD cp MOD "$(PWD)/boot/initramfs/lib/modules"; \
             ) \
             PATH="$$PATH:$(abspath $(TOOLCHAIN_PATH))" \
                 $(MAKE) -C $(KERNEL_PATH) $(MAKE_FLAGS) ARCH=arm \
                 CROSS_COMPILE="$(CCACHE) arm-eabi-"; )
-
 
 .PHONY: clean
 clean: clean-gecko clean-gonk clean-kernel
